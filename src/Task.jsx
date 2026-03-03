@@ -1,5 +1,4 @@
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
@@ -14,7 +13,6 @@ import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
 export default function Task({
@@ -34,13 +32,20 @@ export default function Task({
     desc: taskDetails,
   });
 
-  const handleClickOpen = () => {
+  const handleOpen = () => {
     setOpen(true);
     setEditInputs({ title: taskTitle, desc: taskDetails });
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleSaveEdit = () => {
+    if (editIunputs.title && editIunputs.desc) {
+      handleEditTask({ ...editIunputs, id: id });
+      handleClose();
+    }
   };
 
   return (
@@ -50,11 +55,14 @@ export default function Task({
         padding: "10px",
         background: theme.palette.custom.main,
         borderRadius: "3px",
-        boxShadow: theme.shadows[6],
+        boxShadow: theme.shadows[3],
         transition: "all 0.2s ease",
+        position: "relative",
+        zIndex: 0,
         "&:hover": {
           transform: "translateY(-3px) scale(1.015)",
-          boxShadow: theme.shadows[12],
+          boxShadow: theme.shadows[9],
+          zIndex: 2,
         },
       }}
     >
@@ -89,7 +97,7 @@ export default function Task({
           <IconButton
             color="primary"
             size="small"
-            onClick={handleClickOpen}
+            onClick={handleOpen}
             sx={{
               background: "#ddd",
               transition: "all 0.3s ease",
@@ -187,14 +195,7 @@ export default function Task({
         <DialogActions
           sx={{ justifyContent: "flex-start", background: "#c5cae9" }}
         >
-          <Button
-            onClick={() => {
-              handleEditTask({ ...editIunputs, id: id });
-              handleClose();
-            }}
-          >
-            حفظ
-          </Button>
+          <Button onClick={handleSaveEdit}>حفظ</Button>
           <Button onClick={handleClose}>إلغاء</Button>
         </DialogActions>
       </Dialog>
