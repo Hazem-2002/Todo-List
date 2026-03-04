@@ -2,8 +2,6 @@ import "./App.css";
 import Container from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
@@ -15,85 +13,94 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Task from "./Task";
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
+import Popup from "./Popup";
 import { v4 as uuidv4 } from "uuid";
 
 function App() {
   const [alignment, setAlignment] = useState("all");
   const theme = useTheme();
-  const [openDialog, setOpenDialog] = useState(false);
-  const [addIunputs, setAddInputs] = useState({
-    title: "",
-    desc: "",
-  });
+  const [open, setopen] = useState(false);
+  // localStorage.setItem(
+  //   "data",
+  //   JSON.stringify([
+  //     {
+  //       id: uuidv4(),
+  //       taskTitle: "المهمة الأولي",
+  //       taskDetails: "التفاصيل الخاصة بالمهمة الأولي",
+  //       isCompleted: false,
+  //     },
+  //     {
+  //       id: uuidv4(),
+  //       taskTitle: "المهمة الثانية",
+  //       taskDetails: "التفاصيل الخاصة بالمهمة الثانية",
+  //       isCompleted: false,
+  //     },
+  //     {
+  //       id: uuidv4(),
+  //       taskTitle: "المهمة الثالثة",
+  //       taskDetails: "التفاصيل الخاصة بالمهمة الثالثة",
+  //       isCompleted: false,
+  //     },
+  //   ]),
+  // );
 
-  const [data, setData] = useState([
-    {
-      id: uuidv4(),
-      taskTitle: "المهمة الأولي",
-      taskDetails: "التفاصيل الخاصة بالمهمة الأولي",
-      isCompleted: false,
-    },
-    {
-      id: uuidv4(),
-      taskTitle: "المهمة الثانية",
-      taskDetails: "التفاصيل الخاصة بالمهمة الثانية",
-      isCompleted: false,
-    },
-    {
-      id: uuidv4(),
-      taskTitle: "المهمة الثالثة",
-      taskDetails: "التفاصيل الخاصة بالمهمة الثالثة",
-      isCompleted: false,
-    },
-  ]);
+  const [data, setData] = useState(JSON.parse(localStorage.getItem("data")));
 
   const handleAlignment = (event, newAlignment) => {
     newAlignment && setAlignment(newAlignment);
   };
 
-  const handleAddNewTask = () => {
-    if (addIunputs.title && addIunputs.desc) {
-      setData([
-        ...data,
+  const handleAddNewTask = ({ title, desc }) => {
+    setData((prevData) => {
+      const updated = [
+        ...prevData,
         {
           id: uuidv4(),
-          taskTitle: addIunputs.title,
-          taskDetails: addIunputs.desc,
+          taskTitle: title,
+          taskDetails: desc,
           isCompleted: false,
         },
-      ]);
-      handleClose();
-    }
+      ];
+
+      localStorage.setItem("data", JSON.stringify(updated));
+
+      return updated;
+    });
   };
 
   const handleEditTask = ({ id, title, desc }) => {
-    const index = data.findIndex((ele) => ele.id === id);
-    const newData = [...data];
-    newData[index] = {
-      id: id,
-      taskTitle: title,
-      taskDetails: desc,
-      isCompleted: false,
-    };
-    setData(newData);
+    setData((prevData) => {
+      const updated = prevData.map((ele) =>
+        ele.id === id
+          ? {
+              id: id,
+              taskTitle: title,
+              taskDetails: desc,
+              isCompleted: ele.isCompleted,
+            }
+          : ele,
+      );
+      localStorage.setItem("data", JSON.stringify(updated));
+      return updated;
+    });
   };
 
-  const handleRemoveTask = (id) => {
-    const index = data.findIndex((ele) => ele.id === id);
-    const newData = [...data];
-    newData.splice(index, 1);
-    setData(newData);
+  const handleRemoveTask = ({ id }) => {
+    setData((prevData) => {
+      const updated = prevData.filter((ele) => ele.id !== id);
+      localStorage.setItem("data", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const controlTaskCompletion = (id) => {
-    const index = data.findIndex((ele) => ele.id === id);
-    const newData = [...data];
-    newData[index].isCompleted = !newData[index].isCompleted;
-    setData(newData);
+    setData((prevData) => {
+      const updated = prevData.map((ele) =>
+        ele.id === id ? { ...ele, isCompleted: !ele.isCompleted } : ele,
+      );
+      localStorage.setItem("data", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const renderItems = () => {
@@ -108,24 +115,20 @@ function App() {
     return tasks.map((ele) => (
       <Task
         key={ele.id}
-        id={ele.id}
-        taskTitle={ele.taskTitle}
-        taskDetails={ele.taskDetails}
         controlTaskCompletion={controlTaskCompletion}
         handleRemoveTask={handleRemoveTask}
         handleEditTask={handleEditTask}
-        isCompleted={ele.isCompleted}
+        ele={ele}
       />
     ));
   };
 
   const handleOpen = () => {
-    setOpenDialog(true);
-    setAddInputs({ title: "", desc: "" });
+    setopen(true);
   };
 
   const handleClose = () => {
-    setOpenDialog(false);
+    setopen(false);
   };
 
   return (
@@ -293,78 +296,17 @@ function App() {
             >
               <AddIcon />
             </Fab>
+
+            <Popup
+              open={open}
+              handleClose={handleClose}
+              handleSaveChange={handleAddNewTask}
+              title="إضافة مهمة جديدة"
+              initialInput={false}
+            />
           </CardContent>
         </Card>
       </Container>
-
-      <Dialog open={openDialog} onClose={handleClose}>
-        <DialogTitle
-          sx={{ background: "#c5cae9", color: theme.palette.primary.main }}
-        >
-          تعديل المهمة
-        </DialogTitle>
-        <DialogContent
-          sx={{ paddingTop: 0, paddingBottom: "0", background: "#c5cae9" }}
-        >
-          <TextField
-            autoFocus
-            color="custom"
-            margin="normal"
-            value={addIunputs.title}
-            onChange={(e) =>
-              setAddInputs({ ...addIunputs, title: e.target.value })
-            }
-            label="عنوان المهمة"
-            type="text"
-            fullWidth
-            variant="outlined"
-            slotProps={{
-              inputLabel: {
-                sx: { color: theme.palette.custom.main, opacity: 0.85 },
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.custom.light,
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: `${theme.palette.custom.main} !important`,
-              },
-            }}
-          />
-          <TextField
-            margin="normal"
-            color="custom"
-            label="تفاصيل المهمة"
-            value={addIunputs.desc}
-            onChange={(e) =>
-              setAddInputs({ ...addIunputs, desc: e.target.value })
-            }
-            type="text"
-            fullWidth
-            variant="outlined"
-            slotProps={{
-              inputLabel: {
-                sx: { color: theme.palette.custom.main, opacity: 0.85 },
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.custom.light,
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: `${theme.palette.custom.main} !important`,
-              },
-            }}
-          />
-        </DialogContent>
-        <DialogActions
-          sx={{ justifyContent: "flex-start", background: "#c5cae9" }}
-        >
-          <Button onClick={handleAddNewTask}>حفظ</Button>
-          <Button onClick={handleClose}>إلغاء</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

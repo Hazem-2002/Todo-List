@@ -7,45 +7,34 @@ import { useState } from "react";
 import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
+import Popup from "./Popup";
 
 export default function Task({
-  id,
-  taskTitle,
-  taskDetails,
+  ele,
   controlTaskCompletion,
   handleRemoveTask,
   handleEditTask,
-  isCompleted,
 }) {
+  const { id, taskTitle, taskDetails, isCompleted } = ele;
   const theme = useTheme();
+  const [openEditPopup, setOpenEditPopup] = useState(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState(false);
   const [completed, setCompleted] = useState(isCompleted);
-  const [open, setOpen] = useState(false);
-  const [editIunputs, setEditInputs] = useState({
-    title: taskTitle,
-    desc: taskDetails,
-  });
 
-  const handleOpen = () => {
-    setOpen(true);
-    setEditInputs({ title: taskTitle, desc: taskDetails });
+  const handleOpenEditPopup = () => {
+    setOpenEditPopup(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseEditPopup = () => {
+    setOpenEditPopup(false);
   };
 
-  const handleSaveEdit = () => {
-    if (editIunputs.title && editIunputs.desc) {
-      handleEditTask({ ...editIunputs, id: id });
-      handleClose();
-    }
+  const handleOpenDeletePopup = () => {
+    setOpenDeletePopup(true);
+  };
+
+  const handleCloseDeletePopup = () => {
+    setOpenDeletePopup(false);
   };
 
   return (
@@ -97,7 +86,7 @@ export default function Task({
           <IconButton
             color="primary"
             size="small"
-            onClick={handleOpen}
+            onClick={handleOpenEditPopup}
             sx={{
               background: "#ddd",
               transition: "all 0.3s ease",
@@ -111,10 +100,21 @@ export default function Task({
           >
             <EditIcon />
           </IconButton>
+          <Popup
+            taskTitle={taskTitle}
+            taskDetails={taskDetails}
+            id={id}
+            open={openEditPopup}
+            handleClose={handleCloseEditPopup}
+            handleSaveChange={handleEditTask}
+            title="تعديل المهمة"
+            initialInput={true}
+          />
           <IconButton
             color="error"
             size="small"
-            onClick={() => handleRemoveTask(id)}
+            // handleRemoveTask(id)
+            onClick={handleOpenDeletePopup}
             sx={{
               color: theme.palette.error.main,
               background: "#ddd",
@@ -129,76 +129,20 @@ export default function Task({
           >
             <DeleteIcon />
           </IconButton>
+
+          <Popup
+            taskTitle={taskTitle}
+            taskDetails={taskDetails}
+            id={id}
+            open={openDeletePopup}
+            handleClose={handleCloseDeletePopup}
+            handleSaveChange={handleRemoveTask}
+            title="هل أنت متأكد من حذف هذه المهمة؟"
+            initialInput={true}
+            removeTask={true}
+          />
         </Stack>
       </Stack>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle
-          sx={{ background: "#c5cae9", color: theme.palette.primary.main }}
-        >
-          تعديل المهمة
-        </DialogTitle>
-        <DialogContent
-          sx={{ paddingTop: 0, paddingBottom: "0", background: "#c5cae9" }}
-        >
-          <TextField
-            autoFocus
-            color="custom"
-            margin="normal"
-            value={editIunputs.title}
-            onChange={(e) =>
-              setEditInputs({ ...editIunputs, title: e.target.value })
-            }
-            label="عنوان المهمة"
-            type="text"
-            fullWidth
-            variant="outlined"
-            slotProps={{
-              inputLabel: {
-                sx: { color: theme.palette.custom.main, opacity: 0.85 },
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.custom.light,
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: `${theme.palette.custom.main} !important`,
-              },
-            }}
-          />
-          <TextField
-            margin="normal"
-            color="custom"
-            label="تفاصيل المهمة"
-            value={editIunputs.desc}
-            onChange={(e) =>
-              setEditInputs({ ...editIunputs, desc: e.target.value })
-            }
-            type="text"
-            fullWidth
-            variant="outlined"
-            slotProps={{
-              inputLabel: {
-                sx: { color: theme.palette.custom.main, opacity: 0.85 },
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.custom.light,
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: `${theme.palette.custom.main} !important`,
-              },
-            }}
-          />
-        </DialogContent>
-        <DialogActions
-          sx={{ justifyContent: "flex-start", background: "#c5cae9" }}
-        >
-          <Button onClick={handleSaveEdit}>حفظ</Button>
-          <Button onClick={handleClose}>إلغاء</Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
