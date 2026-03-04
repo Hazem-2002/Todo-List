@@ -20,29 +20,29 @@ function App() {
   const [alignment, setAlignment] = useState("all");
   const theme = useTheme();
   const [open, setopen] = useState(false);
-  // localStorage.setItem(
-  //   "data",
-  //   JSON.stringify([
-  //     {
-  //       id: uuidv4(),
-  //       taskTitle: "المهمة الأولي",
-  //       taskDetails: "التفاصيل الخاصة بالمهمة الأولي",
-  //       isCompleted: false,
-  //     },
-  //     {
-  //       id: uuidv4(),
-  //       taskTitle: "المهمة الثانية",
-  //       taskDetails: "التفاصيل الخاصة بالمهمة الثانية",
-  //       isCompleted: false,
-  //     },
-  //     {
-  //       id: uuidv4(),
-  //       taskTitle: "المهمة الثالثة",
-  //       taskDetails: "التفاصيل الخاصة بالمهمة الثالثة",
-  //       isCompleted: false,
-  //     },
-  //   ]),
-  // );
+  localStorage.setItem(
+    "data",
+    JSON.stringify([
+      {
+        id: uuidv4(),
+        taskTitle: "المهمة الأولي",
+        taskDetails: "التفاصيل الخاصة بالمهمة الأولي",
+        isCompleted: false,
+      },
+      {
+        id: uuidv4(),
+        taskTitle: "المهمة الثانية",
+        taskDetails: "التفاصيل الخاصة بالمهمة الثانية",
+        isCompleted: false,
+      },
+      {
+        id: uuidv4(),
+        taskTitle: "المهمة الثالثة",
+        taskDetails: "التفاصيل الخاصة بالمهمة الثالثة",
+        isCompleted: false,
+      },
+    ]),
+  );
 
   const [data, setData] = useState(JSON.parse(localStorage.getItem("data")));
 
