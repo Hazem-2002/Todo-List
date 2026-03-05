@@ -138,6 +138,9 @@ export default function Popup({
         <Button
           color={removeTask ? "error" : "primary"}
           onClick={handleSaveEdit}
+          disabled={
+            removeTask ? false : !editIunputs.title || !editIunputs.desc
+          }
         >
           {removeTask ? "حذف" : "حفظ"}
         </Button>

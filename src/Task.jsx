@@ -57,10 +57,25 @@ export default function Task({
     >
       <Stack direction="row">
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h5" component="h5">
+          <Typography
+            variant="h5"
+            component="h5"
+            sx={{
+              textDecoration: isCompleted ? "line-through" : "none",
+              textDecorationColor: "#000",
+            }}
+          >
             {taskTitle}
           </Typography>
-          <Typography variant="subtitle1">{taskDetails}</Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              textDecoration: isCompleted ? "line-through" : "none",
+              textDecorationColor: "#000",
+            }}
+          >
+            {taskDetails}
+          </Typography>
         </Box>
         <Stack direction="row" sx={{ alignItems: "center", gap: "8px" }}>
           <IconButton
