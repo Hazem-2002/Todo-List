@@ -15,11 +15,22 @@ import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import Popup from "./Popup";
 import { v4 as uuidv4 } from "uuid";
+import Toast from "./Toast";
 
 function App() {
   const [alignment, setAlignment] = useState("all");
   const theme = useTheme();
   const [open, setopen] = useState(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState(false);
+  const [openEditPopup, setOpenEditPopup] = useState(false);
+  const [openToast, setOpenToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [todoDialog, settodoDialog] = useState({
+    id: 0,
+    taskTitle: "",
+    taskDetails: "",
+    isCompleted: false,
+  });
 
   if (!localStorage.getItem("data")) {
     localStorage.setItem(
@@ -66,7 +77,7 @@ function App() {
       ];
 
       localStorage.setItem("data", JSON.stringify(updated));
-
+      handleOpenToast("تم إضافة المهمة بنجاح");
       return updated;
     });
   };
@@ -86,6 +97,7 @@ function App() {
       localStorage.setItem("data", JSON.stringify(updated));
       return updated;
     });
+    handleOpenToast("تم التحديث بنجاح");
   };
 
   const handleRemoveTask = ({ id }) => {
@@ -94,14 +106,29 @@ function App() {
       localStorage.setItem("data", JSON.stringify(updated));
       return updated;
     });
+    handleOpenToast("تم الحذف بنجاح");
   };
 
   const controlTaskCompletion = (id) => {
     setData((prevData) => {
-      const updated = prevData.map((ele) =>
-        ele.id === id ? { ...ele, isCompleted: !ele.isCompleted } : ele,
-      );
+      let completed;
+
+      const updated = prevData.map((ele) => {
+        if (ele.id === id) {
+          completed = !ele.isCompleted;
+          return { ...ele, isCompleted: completed };
+        }
+        return ele;
+      });
+
       localStorage.setItem("data", JSON.stringify(updated));
+
+      handleOpenToast(
+        completed
+          ? "تم نقل المهمة إلى قائمة المنجز"
+          : "تمت إعادة المهمة إلى قائمة غير المنجز",
+      );
+
       return updated;
     });
   };
@@ -119,9 +146,9 @@ function App() {
       <Task
         key={ele.id}
         controlTaskCompletion={controlTaskCompletion}
-        handleRemoveTask={handleRemoveTask}
-        handleEditTask={handleEditTask}
         ele={ele}
+        handleOpenDeletePopup={handleOpenDeletePopup}
+        handleOpenEditPopup={handleOpenEditPopup}
       />
     ));
   };
@@ -132,6 +159,33 @@ function App() {
 
   const handleClose = () => {
     setopen(false);
+  };
+
+  const handleOpenDeletePopup = (todo) => {
+    setOpenDeletePopup(true);
+    settodoDialog(todo);
+  };
+
+  const handleCloseDeletePopup = () => {
+    setOpenDeletePopup(false);
+  };
+
+  const handleOpenEditPopup = (todo) => {
+    setOpenEditPopup(true);
+    settodoDialog(todo);
+  };
+
+  const handleCloseEditPopup = () => {
+    setOpenEditPopup(false);
+  };
+
+  const handleOpenToast = (message) => {
+    setOpenToast(true);
+    setToastMessage(message);
+  };
+
+  const handleCloseToast = () => {
+    setOpenToast(false);
   };
 
   return (
@@ -306,6 +360,35 @@ function App() {
               handleSaveChange={handleAddNewTask}
               title="إضافة مهمة جديدة"
               initialInput={false}
+            />
+
+            <Popup
+              taskTitle={todoDialog.taskTitle}
+              taskDetails={todoDialog.taskDetails}
+              id={todoDialog.id}
+              open={openDeletePopup}
+              handleClose={handleCloseDeletePopup}
+              handleSaveChange={handleRemoveTask}
+              title="هل أنت متأكد من حذف هذه المهمة؟"
+              initialInput={true}
+              removeTask={true}
+            />
+
+            <Popup
+              taskTitle={todoDialog.taskTitle}
+              taskDetails={todoDialog.taskDetails}
+              id={todoDialog.id}
+              open={openEditPopup}
+              handleClose={handleCloseEditPopup}
+              handleSaveChange={handleEditTask}
+              title="تعديل المهمة"
+              initialInput={true}
+            />
+
+            <Toast
+              open={openToast}
+              handleClose={handleCloseToast}
+              toastMessage={toastMessage}
             />
           </CardContent>
         </Card>

@@ -7,35 +7,16 @@ import { useState } from "react";
 import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import Popup from "./Popup";
 
 export default function Task({
   ele,
   controlTaskCompletion,
-  handleRemoveTask,
-  handleEditTask,
+  handleOpenDeletePopup,
+  handleOpenEditPopup,
 }) {
   const { id, taskTitle, taskDetails, isCompleted } = ele;
   const theme = useTheme();
-  const [openEditPopup, setOpenEditPopup] = useState(false);
-  const [openDeletePopup, setOpenDeletePopup] = useState(false);
   const [completed, setCompleted] = useState(isCompleted);
-
-  const handleOpenEditPopup = () => {
-    setOpenEditPopup(true);
-  };
-
-  const handleCloseEditPopup = () => {
-    setOpenEditPopup(false);
-  };
-
-  const handleOpenDeletePopup = () => {
-    setOpenDeletePopup(true);
-  };
-
-  const handleCloseDeletePopup = () => {
-    setOpenDeletePopup(false);
-  };
 
   return (
     <Box
@@ -101,7 +82,7 @@ export default function Task({
           <IconButton
             color="primary"
             size="small"
-            onClick={handleOpenEditPopup}
+            onClick={() => handleOpenEditPopup(ele)}
             sx={{
               background: "#ddd",
               transition: "all 0.3s ease",
@@ -115,21 +96,11 @@ export default function Task({
           >
             <EditIcon />
           </IconButton>
-          <Popup
-            taskTitle={taskTitle}
-            taskDetails={taskDetails}
-            id={id}
-            open={openEditPopup}
-            handleClose={handleCloseEditPopup}
-            handleSaveChange={handleEditTask}
-            title="تعديل المهمة"
-            initialInput={true}
-          />
+
           <IconButton
             color="error"
             size="small"
-            // handleRemoveTask(id)
-            onClick={handleOpenDeletePopup}
+            onClick={() => handleOpenDeletePopup(ele)}
             sx={{
               color: theme.palette.error.main,
               background: "#ddd",
@@ -144,18 +115,6 @@ export default function Task({
           >
             <DeleteIcon />
           </IconButton>
-
-          <Popup
-            taskTitle={taskTitle}
-            taskDetails={taskDetails}
-            id={id}
-            open={openDeletePopup}
-            handleClose={handleCloseDeletePopup}
-            handleSaveChange={handleRemoveTask}
-            title="هل أنت متأكد من حذف هذه المهمة؟"
-            initialInput={true}
-            removeTask={true}
-          />
         </Stack>
       </Stack>
     </Box>
