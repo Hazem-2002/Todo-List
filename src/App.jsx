@@ -11,11 +11,12 @@ import Stack from "@mui/material/Stack";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Task from "./Task";
-import { useState } from "react";
+import { useState, useReducer } from "react";
 import { useTheme } from "@mui/material/styles";
 import Popup from "./Popup";
 import { v4 as uuidv4 } from "uuid";
 import Toast from "./Toast";
+import TodoReducer from "./Reducer/TodosReducer";
 
 function App() {
   const [alignment, setAlignment] = useState("all");
@@ -58,79 +59,37 @@ function App() {
     );
   }
 
-  const [data, setData] = useState(JSON.parse(localStorage.getItem("data")));
+  const [data, dispatch] = useReducer(
+    TodoReducer,
+    JSON.parse(localStorage.getItem("data")),
+  );
 
   const handleAlignment = (event, newAlignment) => {
     newAlignment && setAlignment(newAlignment);
   };
 
   const handleAddNewTask = ({ title, desc }) => {
-    setData((prevData) => {
-      const updated = [
-        ...prevData,
-        {
-          id: uuidv4(),
-          taskTitle: title,
-          taskDetails: desc,
-          isCompleted: false,
-        },
-      ];
-
-      localStorage.setItem("data", JSON.stringify(updated));
-      handleOpenToast("تم إضافة المهمة بنجاح");
-      return updated;
-    });
+    dispatch({ type: "added", payload: { title, desc } });
+    handleOpenToast("تم إضافة المهمة بنجاح");
   };
 
   const handleEditTask = ({ id, title, desc }) => {
-    setData((prevData) => {
-      const updated = prevData.map((ele) =>
-        ele.id === id
-          ? {
-              id: id,
-              taskTitle: title,
-              taskDetails: desc,
-              isCompleted: ele.isCompleted,
-            }
-          : ele,
-      );
-      localStorage.setItem("data", JSON.stringify(updated));
-      return updated;
-    });
+    dispatch({ type: "updated", payload: { id, title, desc } });
     handleOpenToast("تم التحديث بنجاح");
   };
 
   const handleRemoveTask = ({ id }) => {
-    setData((prevData) => {
-      const updated = prevData.filter((ele) => ele.id !== id);
-      localStorage.setItem("data", JSON.stringify(updated));
-      return updated;
-    });
+    dispatch({ type: "removed", payload: { id } });
     handleOpenToast("تم الحذف بنجاح");
   };
 
   const controlTaskCompletion = (id) => {
-    setData((prevData) => {
-      let completed;
-
-      const updated = prevData.map((ele) => {
-        if (ele.id === id) {
-          completed = !ele.isCompleted;
-          return { ...ele, isCompleted: completed };
-        }
-        return ele;
-      });
-
-      localStorage.setItem("data", JSON.stringify(updated));
-
-      handleOpenToast(
-        completed
-          ? "تم نقل المهمة إلى قائمة المنجز"
-          : "تمت إعادة المهمة إلى قائمة غير المنجز",
-      );
-
-      return updated;
-    });
+    dispatch({ type: "completed", payload: { id } });
+    handleOpenToast(
+      !data.find((ele) => ele.id === id).isCompleted
+        ? "تم نقل المهمة إلى قائمة المنجز"
+        : "تمت إعادة المهمة إلى قائمة غير المنجز",
+    );
   };
 
   const renderItems = () => {
